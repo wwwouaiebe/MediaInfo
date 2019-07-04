@@ -82,13 +82,14 @@ class mediaInfoTpl
 		$mi = array(
 			'rel_url' => 'public/' . $fi,
 			'class_name' => '',
-			'exposure' => '???',
-			'aperture' => '???',
-			'lens' => '???',
-			'iso' => '???',
-			'manufacturer' => '???',
-			'model' => '???',
-			'dateTime' => '???'
+			'exposure' => '',
+			'aperture' => '',
+			'lens' => '',
+			'iso' => '',
+			'manufacturer' => '',
+			'model' => '',
+			'dateTime' => '',
+			'has_exif' => false
 		);
 		if ( file_exists($mi['rel_url']) )
 		{
@@ -100,28 +101,34 @@ class mediaInfoTpl
 			
 			if (!empty($im['Exposure']))
 			{
+				$mi['has_exif'] = true;
 				$mi['exposure'] = $im['Exposure'];
 			}
 			if (!empty($im['FNumber']))
 			{
+				$mi['has_exif'] = true;
 				$fl = sscanf($im['FNumber'],'%d/%d');
 				$mi['aperture'] = $fl ? $fl[0]/$fl[1].'' : $im['FNumber'];
 			}
 			if (!empty($im['FocalLength']))
 			{
+				$mi['has_exif'] = true;
 				$fl = sscanf($im['FocalLength'],'%d/%d');
 				$mi['lens'] = $fl ? $fl[0]/$fl[1].'' : $im['FocalLength'];
 			}
 			if (!empty($im['ISOSpeedRatings']))
 			{
+				$mi['has_exif'] = true;
 				$mi['iso'] = $im['ISOSpeedRatings'];
 			}
 			if (isset($im['Make']))
 			{
+				$mi['has_exif'] = true;
 				$mi['manufacturer'] = $im['Make'];
 			}
 			if (isset($im['Model']))
 			{
+				$mi['has_exif'] = true;
 				$mi['model'] = $im['Model'];
 			}
 			if (!empty($im['DateTimeOriginal']))
@@ -168,6 +175,11 @@ class mediaInfoTpl
         if (isset($attr['is_mp3'])) {
             $sign = (boolean) $attr['is_mp3'] ? '==' : '!=';
             $if[] = '$attach_f->type ' . $sign . ' "audio/mpeg3"';
+        }
+		
+        if (isset($attr['has_exif'])) {
+            $sign = (boolean) $attr['has_exif'] ? '' : '!';
+            $if[] = $sign . '$m[\'has_exif\']';
         }
 
         if (isset($attr['is_flv'])) {
