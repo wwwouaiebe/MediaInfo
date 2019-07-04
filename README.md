@@ -1,0 +1,2 @@
+# MediaInfo
+plugin for Dotclear
