@@ -63,7 +63,6 @@ class mediaInfoTpl
             'if ($_ctx->posts !== null && $core->media) {' . "\n" .
             '$_ctx->mediaInfos = new ArrayObject($core->media->getPostMedia($_ctx->posts->post_id,null,"attachment"));' . "\n" .
             "?>\n" .
-
             '<?php foreach ($_ctx->mediaInfos as $attach_i => $attach_f) : ' .
             '$GLOBALS[\'attach_i\'] = $attach_i; $GLOBALS[\'attach_f\'] = $attach_f;' .
             '$_ctx->file_url = $attach_f->file_url;' .
@@ -89,15 +88,18 @@ class mediaInfoTpl
 			'manufacturer' => '',
 			'model' => '',
 			'dateTime' => '',
-			'has_exif' => false
+			'has_exif' => false,
+			'thumbnailUrl' => ''
 		);
 		if ( file_exists($mi['rel_url']) )
 		{
+			
 			$infos = getimagesize($mi['rel_url']);
 			$mi['class_name'] = $infos[1] > $infos[0] ? "Portrait" : "Landscape";
 			$im = imageMeta::readMeta($mi['rel_url']);
 			
-			$mi['rel_url'] = '/' . $mi['rel_url'];
+			$path_parts = pathinfo($mi['rel_url']);
+			$mi['thumbnailUrl'] = $path_parts['dirname'] . '/' . $path_parts['filename'] . '_s.' . $path_parts['extension'];
 			
 			if (!empty($im['Exposure']))
 			{
@@ -234,13 +236,7 @@ class mediaInfoTpl
      public static function MediaInfoThumbnailURL($attr)
     {
         $f = $GLOBALS['core']->tpl->getFilters($attr);
-        return
-        '<?php ' .
-        'if (isset($attach_f->media_thumb[\'sq\'])) {' . 
-		'echo ' . sprintf($f, '$attach_f->media_thumb[\'s\']') . 
-		';' .
-		'}' . 
-		'?>';
+        return '<?php echo ' . sprintf($f, '$m[\'thumbnailUrl\']') . '; ?>';
     }
 
     public static function MediaInfoURL($attr)
