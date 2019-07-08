@@ -103,34 +103,51 @@ class mediaInfoTpl
 			
 			if (!empty($im['Exposure']))
 			{
-				$mi['has_exif'] = true;
-				$mi['exposure'] = $im['Exposure'];
+				// pictures modified with gimp $im['Exposure'] = '1/25 sec.'
+				$im['Exposure'] = str_replace( ' sec.', '', $im['Exposure']  );
+				if (!empty($im['Exposure']))
+				{
+					$fl = sscanf($im['Exposure'],'%d/%d');
+					$mi['exposure'] = $fl && $fl[0]/$fl[1] == 1 ? 1 : $im['Exposure'];
+				}
 			}
 			if (!empty($im['FNumber']))
 			{
-				$mi['has_exif'] = true;
-				$fl = sscanf($im['FNumber'],'%d/%d');
-				$mi['aperture'] = $fl ? $fl[0]/$fl[1].'' : $im['FNumber'];
+				// pictures modified with gimp $im['FNumber'] = 'f/9,0'
+				$im['FNumber'] = str_replace( 'f/', '', $im['FNumber']  );
+				$im['FNumber'] = str_replace( ',0', '', $im['FNumber']  );
+				if (!empty($im['FNumber']))
+				{
+					$fl = sscanf($im['FNumber'],'%d/%d');
+					$mi['aperture'] = $fl && $fl[0] && $fl[1] ? $fl[0]/$fl[1].'' : $im['FNumber'];
+				}
 			}
 			if (!empty($im['FocalLength']))
 			{
-				$mi['has_exif'] = true;
-				$fl = sscanf($im['FocalLength'],'%d/%d');
-				$mi['lens'] = $fl ? $fl[0]/$fl[1].'' : $im['FocalLength'];
+				// pictures modified with gimp $im['FocalLength'] = '31,0 mm'
+				$im['FocalLength'] = str_replace( ' mm', '', $im['FocalLength']  );
+				$im['FocalLength'] = str_replace( ',0', '', $im['FocalLength']  );
+				if (!empty($im['FocalLength']))
+				{
+					$fl = sscanf($im['FocalLength'],'%d/%d');
+					$mi['lens'] = $fl && $fl[0] && $fl[1] ? $fl[0]/$fl[1]. '' : $im['FocalLength'];
+				}
 			}
 			if (!empty($im['ISOSpeedRatings']))
 			{
-				$mi['has_exif'] = true;
 				$mi['iso'] = $im['ISOSpeedRatings'];
 			}
-			if (isset($im['Make']))
+			if ( !empty($mi['iso']) && !empty($mi['lens']) && !empty($mi['aperture']) && !empty($mi['exposure']) )
 			{
 				$mi['has_exif'] = true;
+			}
+			
+			if (isset($im['Make']))
+			{
 				$mi['manufacturer'] = $im['Make'];
 			}
 			if (isset($im['Model']))
 			{
-				$mi['has_exif'] = true;
 				$mi['model'] = $im['Model'];
 			}
 			if (!empty($im['DateTimeOriginal']))
