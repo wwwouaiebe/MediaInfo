@@ -5,8 +5,8 @@
 # 
 # Copyright (c) 2019 wwwouaiebe
 # contact: http://www.ouaie.be/contact
-# this plugin is inspired by the entryPhotoExifWidget plugin  from Jean-Christian Denis
-# and the attachments plugin from Olivier Meunier
+# this plugin is inspired by the entryPhotoExifWidget plugin  by Jean-Christian Denis
+# and the attachments plugin by Olivier Meunier
 # 
 # This  program is free software;
 # you can redistribute it and/or modify it under the terms of the 
@@ -31,23 +31,22 @@ $core->tpl->addBlock('MediaInfosHeader', array('mediaInfoTpl', 'MediaInfosHeader
 $core->tpl->addBlock('MediaInfosFooter', array('mediaInfoTpl', 'MediaInfosFooter'));
 $core->tpl->addBlock('MediaInfoIf', array('mediaInfoTpl', 'MediaInfoIf'));
 
-$core->tpl->addValue('MediaInfoMimeType', array('mediaInfoTpl', 'MediaInfoMimeType'));
-$core->tpl->addValue('MediaInfoType', array('mediaInfoTpl', 'MediaInfoType'));
 $core->tpl->addValue('MediaInfoFileName', array('mediaInfoTpl', 'MediaInfoFileName'));
-$core->tpl->addValue('MediaInfoSize', array('mediaInfoTpl', 'MediaInfoSize'));
-$core->tpl->addValue('MediaInfoThumbnailURL', array('mediaInfoTpl', 'MediaInfoThumbnailURL'));
-$core->tpl->addValue('MediaInfoURL', array('mediaInfoTpl', 'MediaInfoURL'));
+$core->tpl->addValue('MediaInfoUrl', array('mediaInfoTpl', 'MediaInfoUrl'));
 
+$core->tpl->addValue('MediaInfoMimeType', array('mediaInfoTpl', 'MediaInfoMimeType'));
+$core->tpl->addValue('MediaInfoSize', array('mediaInfoTpl', 'MediaInfoSize'));
+$core->tpl->addValue('MediaInfoThumbnailUrl', array('mediaInfoTpl', 'MediaInfoThumbnailUrl'));
 $core->tpl->addValue('MediaInfoRelUrl', array('mediaInfoTpl', 'MediaInfoRelUrl'));
 $core->tpl->addValue('MediaInfoClass', array('mediaInfoTpl', 'MediaInfoClass'));
-$core->tpl->addValue('MediaInfoExposure', array('mediaInfoTpl', 'MediaInfoExposure'));
-$core->tpl->addValue('MediaInfoAperture', array('mediaInfoTpl', 'MediaInfoAperture'));
-$core->tpl->addValue('MediaInfoLens', array('mediaInfoTpl', 'MediaInfoLens'));
-$core->tpl->addValue('MediaInfoIso', array('mediaInfoTpl', 'MediaInfoIso'));
-$core->tpl->addValue('MediaInfoManufacturer', array('mediaInfoTpl', 'MediaInfoManufacturer'));
+$core->tpl->addValue('MediaInfoExposureTime', array('mediaInfoTpl', 'MediaInfoExposureTime'));
+$core->tpl->addValue('MediaInfoFNumber', array('mediaInfoTpl', 'MediaInfoFNumber'));
+$core->tpl->addValue('MediaInfoFocalLength', array('mediaInfoTpl', 'MediaInfoFocalLength'));
+$core->tpl->addValue('MediaInfoISOSpeedRatings', array('mediaInfoTpl', 'MediaInfoISOSpeedRatings'));
+$core->tpl->addValue('MediaInfoMake', array('mediaInfoTpl', 'MediaInfoMake'));
 $core->tpl->addValue('MediaInfoModel', array('mediaInfoTpl', 'MediaInfoModel'));
-$core->tpl->addValue('MediaInfoDateTime', array('mediaInfoTpl', 'MediaInfoDateTime'));
-$core->tpl->addValue('MediaInfoPhoto', array('mediaInfoTpl', 'MediaInfoPhoto'));
+$core->tpl->addValue('MediaInfoDateTimeOriginal', array('mediaInfoTpl', 'MediaInfoDateTimeOriginal'));
+$core->tpl->addValue('MediaInfoAllExif', array('mediaInfoTpl', 'MediaInfoAllExif'));
 
 $core->tpl->addValue('EntryMediaInfoCount', array('mediaInfoTpl', 'EntryMediaInfoCount'));
 
@@ -79,81 +78,138 @@ class mediaInfoTpl
     public static function MediaInfoSearch($fi)
     {
 		$mi = array(
-			'rel_url' => 'public/' . $fi,
-			'class_name' => '',
-			'exposure' => '',
-			'aperture' => '',
-			'lens' => '',
-			'iso' => '',
-			'manufacturer' => '',
-			'model' => '',
-			'dateTime' => '',
+			'RelUrl' => 'public/' . $fi,
+			'Class' => 'Landscape',
+			'ExposureTime' => '',
+			'FNumber' => '',
+			'FocalLength' => '',
+			'ISOSpeedRatings' => '',
+			'Make' => '',
+			'Model' => '',
+			'DateTimeOriginal' => '',
 			'has_exif' => false,
-			'thumbnailUrl' => ''
+			'ThumbnailUrl' => '',
+			'Size' => '0 b.',
+			'MimeType' => '',
+			'FileName' =>'',
+			'has_thumbnail' =>false,
+			'is_jpg' => false,
+			'is_tiff' => false
 		);
-		if ( file_exists($mi['rel_url']) )
+		if ( file_exists($mi['RelUrl']) )
 		{
-			
-			$infos = getimagesize($mi['rel_url']);
-			$mi['class_name'] = $infos[1] > $infos[0] ? "Portrait" : "Landscape";
-			$im = imageMeta::readMeta($mi['rel_url']);
-			
-			$path_parts = pathinfo($mi['rel_url']);
-			$mi['thumbnailUrl'] = $path_parts['dirname'] . '/' . $path_parts['filename'] . '_s.' . $path_parts['extension'];
-			
-			if (!empty($im['Exposure']))
+			$path_parts = pathinfo($mi['RelUrl']);
+			$ThumbnailUrl = $path_parts['dirname'] . '/' . $path_parts['filename'] . '_s.' . $path_parts['extension'];
+			$ext = strtoupper ( $path_parts['extension'] );
+			if ( 'JPG' != $ext && 'JPEG' != $ext && 'TIF' != $ext && 'TIFF' != $ext ) {
+				return;
+			}
+			if ( 'JPG' == $ext || 'JPEG' == $ext ) {
+				$mi['is_jpg'] = true;
+			}
+			else {
+				$mi['is_tiff'] = true;
+			}
+			if ( file_exists($ThumbnailUrl) )
 			{
-				// pictures modified with gimp $im['Exposure'] = '1/25 sec.'
-				$im['Exposure'] = str_replace( ' sec.', '', $im['Exposure']  );
-				if (!empty($im['Exposure']))
+				$mi['ThumbnailUrl'] = $ThumbnailUrl;
+				$mi['has_thumbnail'] = true;
+			}
+
+			$exif = exif_read_data($mi['RelUrl'], 'ANY_TAG', true );
+			if ( $exif )
+			{
+				if ( $exif[ 'FILE'] )
 				{
-					$fl = sscanf($im['Exposure'],'%d/%d');
-					$mi['exposure'] = $fl && $fl[0]/$fl[1] == 1 ? 1 : $im['Exposure'];
+					if (!empty($exif[ 'FILE']['FileSize']))
+					{
+						if ( 1000 > $exif[ 'FILE']['FileSize'] )
+						{
+							$mi['Size'] = sprintf ( '%d o.', $exif[ 'FILE']['FileSize']);
+						}
+						else if ( 1000000 > $exif[ 'FILE']['FileSize'] ) 
+						{
+							$mi['Size'] = sprintf ( '%d Ko.', $exif[ 'FILE']['FileSize']/1000);
+						}
+						else
+						{
+							$mi['Size'] = sprintf ( '%f Mo.', $exif[ 'FILE']['FileSize']/1000000);
+						}
+					}
+					if (!empty($exif[ 'FILE']['MimeType']))
+					{
+						$mi['MimeType'] = $exif[ 'FILE']['MimeType'];
+					}
+					if (!empty($exif[ 'FILE']['FileName']))
+					{
+						$mi['FileName'] = $exif[ 'FILE']['FileName'];
+					}
+				}
+				if ( $exif[ 'COMPUTED'] && $exif[ 'COMPUTED']['Height'] && $exif[ 'COMPUTED']['Width'] )
+				{
+					$mi['Class'] = $exif[ 'COMPUTED']['Height'] > $exif[ 'COMPUTED']['Width'] ? "Portrait" : "Landscape";
+				}
+				if ( $exif[ 'IFD0'] )
+				{
+					if (!empty($exif[ 'IFD0']['Make']))
+					{
+						$mi['Make'] = $exif[ 'IFD0']['Make'];
+					}
+					if (!empty($exif[ 'IFD0']['Model']))
+					{
+						$mi['Model'] = $exif[ 'IFD0']['Model'];
+					}
+				}
+				if ( $exif[ 'EXIF'] )
+				{
+					if (!empty($exif[ 'EXIF']['FNumber']))
+					{
+						$fl = sscanf($exif[ 'EXIF']['FNumber'],'%d/%d');
+						$mi['FNumber'] = $fl && $fl[0] && $fl[1] ? $fl[0]/$fl[1].'' : $exif[ 'EXIF']['FNumber'];
+					}
+					if (!empty($exif[ 'EXIF']['ExposureTime']))
+					{
+						$fl = sscanf($exif[ 'EXIF']['ExposureTime'],'%d/%d');
+						if ( $fl && $fl[0] && $fl[1] )
+						{
+							if ( $fl[0] == $fl[1] )
+							{
+								$mi['ExposureTime'] = '1';
+							}
+							else if ( $fl[0] > $fl[1] )
+							{
+								$mi['ExposureTime'] = sprintf ( '%d',  $fl[0]/ $fl[1] );
+							}
+							else
+							{
+								$mi['ExposureTime'] = $exif[ 'EXIF']['ExposureTime'];
+							}
+						}
+						else
+						{
+							$mi['ExposureTime'] = $exif[ 'EXIF']['ExposureTime'];
+						}
+					}
+					if (!empty($exif[ 'EXIF']['ISOSpeedRatings']))
+					{
+						$mi['ISOSpeedRatings'] = $exif[ 'EXIF']['ISOSpeedRatings'];
+					}
+					if (!empty($exif[ 'EXIF']['FocalLength']))
+					{
+						$fl = sscanf($exif[ 'EXIF']['FocalLength'],'%d/%d');
+						$mi['FocalLength'] = $fl && $fl[0] && $fl[1] ? sprintf ( '%d',  $fl[0]/ $fl[1] ) : $im['FocalLength'];
+					}
+					if (!empty($exif[ 'EXIF']['DateTimeOriginal']))
+					{
+						$mi['DateTimeOriginal'] = $exif[ 'EXIF']['DateTimeOriginal'];
+					}
 				}
 			}
-			if (!empty($im['FNumber']))
-			{
-				// pictures modified with gimp $im['FNumber'] = 'f/9,0'
-				$im['FNumber'] = str_replace( 'f/', '', $im['FNumber']  );
-				$im['FNumber'] = str_replace( ',0', '', $im['FNumber']  );
-				if (!empty($im['FNumber']))
-				{
-					$fl = sscanf($im['FNumber'],'%d/%d');
-					$mi['aperture'] = $fl && $fl[0] && $fl[1] ? $fl[0]/$fl[1].'' : $im['FNumber'];
-				}
-			}
-			if (!empty($im['FocalLength']))
-			{
-				// pictures modified with gimp $im['FocalLength'] = '31,0 mm'
-				$im['FocalLength'] = str_replace( ' mm', '', $im['FocalLength']  );
-				$im['FocalLength'] = str_replace( ',0', '', $im['FocalLength']  );
-				if (!empty($im['FocalLength']))
-				{
-					$fl = sscanf($im['FocalLength'],'%d/%d');
-					$mi['lens'] = $fl && $fl[0] && $fl[1] ? $fl[0]/$fl[1]. '' : $im['FocalLength'];
-				}
-			}
-			if (!empty($im['ISOSpeedRatings']))
-			{
-				$mi['iso'] = $im['ISOSpeedRatings'];
-			}
-			if ( !empty($mi['iso']) && !empty($mi['lens']) && !empty($mi['aperture']) && !empty($mi['exposure']) )
+			
+			if ( !empty($mi['ISOSpeedRatings']) && !empty($mi['FocalLength']) && !empty($mi['FNumber']) && !empty($mi['ExposureTime']) )
 			{
 				$mi['has_exif'] = true;
-			}
-			
-			if (isset($im['Make']))
-			{
-				$mi['manufacturer'] = $im['Make'];
-			}
-			if (isset($im['Model']))
-			{
-				$mi['model'] = $im['Model'];
-			}
-			if (!empty($im['DateTimeOriginal']))
-			{
-				$mi['dateTime'] = $im['DateTimeOriginal'];
-			}
+			}			
 		} 
 		
 		return $mi;
@@ -181,39 +237,24 @@ class mediaInfoTpl
 
         $operator = isset($attr['operator']) ? dcTemplate::getOperator($attr['operator']) : '&&';
 
-        if (isset($attr['is_image'])) {
-            $sign = (boolean) $attr['is_image'] ? '' : '!';
-            $if[] = $sign . '$attach_f->media_image';
-        }
-
-        if (isset($attr['has_thumb'])) {
-            $sign = (boolean) $attr['has_thumb'] ? '' : '!';
-            $if[] = $sign . 'isset($attach_f->media_thumb[\'sq\'])';
-        }
-
-        if (isset($attr['is_mp3'])) {
-            $sign = (boolean) $attr['is_mp3'] ? '==' : '!=';
-            $if[] = '$attach_f->type ' . $sign . ' "audio/mpeg3"';
-        }
-		
         if (isset($attr['has_exif'])) {
             $sign = (boolean) $attr['has_exif'] ? '' : '!';
             $if[] = $sign . '$m[\'has_exif\']';
         }
 
-        if (isset($attr['is_flv'])) {
-            $sign = (boolean) $attr['is_flv'] ? '==' : '!=';
-            $if[] = '$attach_f->type ' . $sign . ' "video/x-flv"';
+        if (isset($attr['has_thumbnail'])) {
+            $sign = (boolean) $attr['has_thumbnail'] ? '' : '!';
+            $if[] = $sign . '$m[\'has_thumbnail\']';
         }
 
-        if (isset($attr['is_audio'])) {
-            $sign = (boolean) $attr['is_audio'] ? '==' : '!=';
-            $if[] = '$attach_f->type_prefix ' . $sign . ' "audio"';
+        if (isset($attr['is_jpg'])) {
+            $sign = (boolean) $attr['is_jpg'] ? '' : '!';
+            $if[] = $sign . '$m[\'is_jpg\']';
         }
-
-        if (isset($attr['is_video'])) {
-            $sign = (boolean) $attr['is_video'] ? '==' : '!=';
-            $if[] = '$attach_f->type_prefix ' . $sign . ' "video"';
+		
+        if (isset($attr['is_tiff'])) {
+            $sign = (boolean) $attr['is_tiff'] ? '' : '!';
+            $if[] = $sign . '$m[\'is_tiff\']';
         }
 
         if (count($if) != 0) {
@@ -226,37 +267,28 @@ class mediaInfoTpl
     public static function MediaInfoMimeType($attr)
     {
         $f = $GLOBALS['core']->tpl->getFilters($attr);
-        return '<?php echo ' . sprintf($f, '$attach_f->type') . '; ?>';
-    }
-
-    public static function MediaInfoType($attr)
-    {
-        $f = $GLOBALS['core']->tpl->getFilters($attr);
-        return '<?php echo ' . sprintf($f, '$attach_f->media_type') . '; ?>';
+       return '<?php echo ' . sprintf($f, '$m[\'MimeType\']') . '; ?>';
     }
 
     public static function MediaInfoFileName($attr)
     {
         $f = $GLOBALS['core']->tpl->getFilters($attr);
-        return '<?php echo ' . sprintf($f, '$attach_f->basename') . '; ?>';
+        return '<?php echo ' . sprintf($f, '$m[\'FileName\']') . '; ?>';
     }
 
     public static function MediaInfoSize($attr)
     {
-        $f = $GLOBALS['core']->tpl->getFilters($attr);
-        if (!empty($attr['full'])) {
-            return '<?php echo ' . sprintf($f, '$attach_f->size') . '; ?>';
-        }
-        return '<?php echo ' . sprintf($f, 'files::size($attach_f->size)') . '; ?>';
+         $f = $GLOBALS['core']->tpl->getFilters($attr);
+        return '<?php echo ' . sprintf($f, '$m[\'Size\']') . '; ?>';
     }
 
-     public static function MediaInfoThumbnailURL($attr)
+    public static function MediaInfoThumbnailUrl($attr)
     {
         $f = $GLOBALS['core']->tpl->getFilters($attr);
-        return '<?php echo ' . sprintf($f, '$m[\'thumbnailUrl\']') . '; ?>';
+        return '<?php echo ' . sprintf($f, '$m[\'ThumbnailUrl\']') . '; ?>';
     }
 
-    public static function MediaInfoURL($attr)
+    public static function MediaInfoUrl($attr)
     {
         $f = $GLOBALS['core']->tpl->getFilters($attr);
         return '<?php echo ' . sprintf($f, '$attach_f->file_url') . '; ?>';
@@ -265,33 +297,33 @@ class mediaInfoTpl
     public static function MediaInfoRelUrl($attr)
     {
         $f = $GLOBALS['core']->tpl->getFilters($attr);
-        return '<?php echo ' . sprintf($f, '$m[\'rel_url\']') . '; ?>';
+        return '<?php echo ' . sprintf($f, '$m[\'RelUrl\']') . '; ?>';
     }
 	
    public static function MediaInfoClass($attr)
     {
         $f = $GLOBALS['core']->tpl->getFilters($attr);
-        return '<?php echo ' . sprintf($f, '$m[\'class_name\']') . '; ?>';
+        return '<?php echo ' . sprintf($f, '$m[\'Class\']') . '; ?>';
     }
 	
-     public static function MediaInfoExposure($attr)
+     public static function MediaInfoExposureTime($attr)
     {
- 	   return mediaInfoTpl::MediaInfoFormat($attr, 'exposure');
+ 	   return mediaInfoTpl::MediaInfoFormat($attr, 'ExposureTime');
     }
 
-    public static function MediaInfoAperture($attr)
+    public static function MediaInfoFNumber($attr)
     {
- 	   return mediaInfoTpl::MediaInfoFormat($attr, 'aperture');
+ 	   return mediaInfoTpl::MediaInfoFormat($attr, 'FNumber');
     }
 
-    public static function MediaInfoLens($attr)
+    public static function MediaInfoFocalLength($attr)
     {
-	   return mediaInfoTpl::MediaInfoFormat($attr, 'lens');
+	   return mediaInfoTpl::MediaInfoFormat($attr, 'FocalLength');
     }
 
-    public static function MediaInfoIso($attr)
+    public static function MediaInfoISOSpeedRatings($attr)
     {
- 	   return mediaInfoTpl::MediaInfoFormat($attr, 'iso');
+ 	   return mediaInfoTpl::MediaInfoFormat($attr, 'ISOSpeedRatings');
     }
 
 	public static function MediaInfoFormat($attr, $tech)
@@ -304,36 +336,36 @@ class mediaInfoTpl
        return '<?php echo ' . sprintf($f, 'sprintf(\'' . $format . '\',$m[\'' . $tech . '\']) ') . '; ?>';
 	}
 	
-	public static function MediaInfoPhoto($attr)
+	public static function MediaInfoAllExif($attr)
 	{
  		$format = '%s %s %s %s %s';
         if (isset($attr['format'])) {
 			$format = addslashes($attr['format']);
 		}
 		$f = $GLOBALS['core']->tpl->getFilters($attr);
-       return '<?php echo ' . sprintf($f, 'sprintf(\'' . $format . '\',$m[\'model\'],$m[\'lens\'],$m[\'aperture\'],$m[\'exposure\'],$m[\'iso\'] ) ') . '; ?>';
+       return '<?php echo ' . sprintf($f, 'sprintf(\'' . $format . '\',$m[\'Model\'],$m[\'FocalLength\'],$m[\'FNumber\'],$m[\'ExposureTime\'],$m[\'ISOSpeedRatings\'] ) ') . '; ?>';
 	}
 	
-    public static function MediaInfoManufacturer($attr)
+    public static function MediaInfoMake($attr)
     {
         $f = $GLOBALS['core']->tpl->getFilters($attr);
-        return '<?php echo ' . sprintf($f, '$m[\'manufacturer\']') . '; ?>';
+        return '<?php echo ' . sprintf($f, '$m[\'Make\']') . '; ?>';
     }
 
     public static function MediaInfoModel($attr)
     {
         $f = $GLOBALS['core']->tpl->getFilters($attr);
-        return '<?php echo ' . sprintf($f, '$m[\'model\']') . '; ?>';
+        return '<?php echo ' . sprintf($f, '$m[\'Model\']') . '; ?>';
     }
 
-    public static function MediaInfoDateTime($attr)
+    public static function MediaInfoDateTimeOriginal($attr)
     {
 		$format = '%A %e %B %Y %H:%M:%S';
         if (isset($attr['format'])) {
 			$format = addslashes($attr['format']);
 		}
 		$f = $GLOBALS['core']->tpl->getFilters($attr);
-        return '<?php echo ' . sprintf($f, 'dt::dt2str(\'' . $format . '\', $m[\'dateTime\'])' ) . '; ?>';
+        return '<?php echo ' . sprintf($f, 'dt::dt2str(\'' . $format . '\', $m[\'DateTimeOriginal\'])' ) . '; ?>';
     }
 
      public static function EntryMediaInfoCount($attr)
