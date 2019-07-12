@@ -31,9 +31,8 @@ $core->tpl->addBlock('MediaInfosHeader', array('mediaInfoTpl', 'MediaInfosHeader
 $core->tpl->addBlock('MediaInfosFooter', array('mediaInfoTpl', 'MediaInfosFooter'));
 $core->tpl->addBlock('MediaInfoIf', array('mediaInfoTpl', 'MediaInfoIf'));
 
-$core->tpl->addValue('MediaInfoFileName', array('mediaInfoTpl', 'MediaInfoFileName'));
 $core->tpl->addValue('MediaInfoUrl', array('mediaInfoTpl', 'MediaInfoUrl'));
-
+$core->tpl->addValue('MediaInfoFileName', array('mediaInfoTpl', 'MediaInfoFileName'));
 $core->tpl->addValue('MediaInfoMimeType', array('mediaInfoTpl', 'MediaInfoMimeType'));
 $core->tpl->addValue('MediaInfoSize', array('mediaInfoTpl', 'MediaInfoSize'));
 $core->tpl->addValue('MediaInfoThumbnailUrl', array('mediaInfoTpl', 'MediaInfoThumbnailUrl'));
@@ -339,11 +338,32 @@ class mediaInfoTpl
 	public static function MediaInfoAllExif($attr)
 	{
  		$format = '%s %s %s %s %s';
+ 		$var = '\',$m[\'Model\'],$m[\'FocalLength\'],$m[\'FNumber\'],$m[\'ExposureTime\'],$m[\'ISOSpeedRatings\'] ) ';
         if (isset($attr['format'])) {
-			$format = addslashes($attr['format']);
+			$formatArray = explode ( '%', addslashes($attr['format']) );
+			$var = '\',';
+			$format = '';
+			foreach ( $formatArray  as $i => $formatPart ) {
+				switch ( $formatPart ) {
+					case 'Model':
+					case 'FocalLength':
+					case 'FNumber':
+					case 'ExposureTime':
+					case 'ISOSpeedRatings':
+					case 'Make':
+						$var .= '$m[\'' . $formatPart . '\'],';
+						$format .= '%s';
+						break;
+					default:
+						$format .= $formatPart;
+						break;
+				}					
+			}
+			$var = substr ($var, 0, -1 );
+			$var .= ' ) ';
 		}
-		$f = $GLOBALS['core']->tpl->getFilters($attr);
-       return '<?php echo ' . sprintf($f, 'sprintf(\'' . $format . '\',$m[\'Model\'],$m[\'FocalLength\'],$m[\'FNumber\'],$m[\'ExposureTime\'],$m[\'ISOSpeedRatings\'] ) ') . '; ?>';
+ 		$f = $GLOBALS['core']->tpl->getFilters($attr);
+        return '<?php echo ' . sprintf($f, 'sprintf(\'' . $format . $var ) . '; ?>';
 	}
 	
     public static function MediaInfoMake($attr)
