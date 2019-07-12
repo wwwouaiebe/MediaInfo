@@ -46,14 +46,13 @@ $core->tpl->addValue('MediaInfoMake', array('mediaInfoTpl', 'MediaInfoMake'));
 $core->tpl->addValue('MediaInfoModel', array('mediaInfoTpl', 'MediaInfoModel'));
 $core->tpl->addValue('MediaInfoDateTimeOriginal', array('mediaInfoTpl', 'MediaInfoDateTimeOriginal'));
 $core->tpl->addValue('MediaInfoAllExif', array('mediaInfoTpl', 'MediaInfoAllExif'));
-
 $core->tpl->addValue('EntryMediaInfoCount', array('mediaInfoTpl', 'EntryMediaInfoCount'));
-
-$core->addBehavior('tplIfConditions', array('mediaInfoBehavior', 'tplIfConditions'));
 
 class mediaInfoTpl
 {
 
+	/* MediaInfos */
+	
     public static function MediaInfos($attr, $content)
     {
         $res =
@@ -73,6 +72,8 @@ class mediaInfoTpl
 
         return $res;
     }
+
+	/* MediaInfoSearch */
 	
     public static function MediaInfoSearch($fi)
     {
@@ -203,6 +204,8 @@ class mediaInfoTpl
 		return $mi;
     }
 
+	/* MediaInfosHeader */
+	
     public static function MediaInfosHeader($attr, $content)
     {
         return
@@ -211,6 +214,8 @@ class mediaInfoTpl
             "<?php endif; ?>";
     }
 
+	/* MediaInfosFooter */
+	
     public static function MediaInfosFooter($attr, $content)
     {
         return
@@ -218,6 +223,8 @@ class mediaInfoTpl
             $content .
             "<?php endif; ?>";
     }
+
+	/* MediaInfoIf */
 
      public static function MediaInfoIf($attr, $content)
     {
@@ -252,11 +259,15 @@ class mediaInfoTpl
         }
     }
 
+	/* MediaInfoMimeType */
+
     public static function MediaInfoMimeType($attr)
     {
         $f = $GLOBALS['core']->tpl->getFilters($attr);
        return '<?php echo ' . sprintf($f, '$m[\'MimeType\']') . '; ?>';
     }
+
+	/* MediaInfoFileName */
 
     public static function MediaInfoFileName($attr)
     {
@@ -264,49 +275,67 @@ class mediaInfoTpl
         return '<?php echo ' . sprintf($f, '$m[\'FileName\']') . '; ?>';
     }
 
+	/* MediaInfoThumbnailUrl */
+
     public static function MediaInfoThumbnailUrl($attr)
     {
         $f = $GLOBALS['core']->tpl->getFilters($attr);
         return '<?php echo ' . sprintf($f, '$m[\'ThumbnailUrl\']') . '; ?>';
     }
 
+	/* MediaInfoUrl */
+
     public static function MediaInfoUrl($attr)
     {
         $f = $GLOBALS['core']->tpl->getFilters($attr);
         return '<?php echo ' . sprintf($f, '$attach_f->file_url') . '; ?>';
     }
-	
+
+	/* MediaInfoRelUrl */
+
     public static function MediaInfoRelUrl($attr)
     {
         $f = $GLOBALS['core']->tpl->getFilters($attr);
         return '<?php echo ' . sprintf($f, '$m[\'RelUrl\']') . '; ?>';
     }
-	
-   public static function MediaInfoClass($attr)
+
+	/* MediaInfoClass */
+
+    public static function MediaInfoClass($attr)
     {
         $f = $GLOBALS['core']->tpl->getFilters($attr);
         return '<?php echo ' . sprintf($f, '$m[\'Class\']') . '; ?>';
     }
-	
+
+	/* MediaInfoExposureTime */
+
      public static function MediaInfoExposureTime($attr)
     {
  	   return mediaInfoTpl::MediaInfoFormat($attr, 'ExposureTime');
     }
+
+	/* MediaInfoFNumber */
 
     public static function MediaInfoFNumber($attr)
     {
  	   return mediaInfoTpl::MediaInfoFormat($attr, 'FNumber');
     }
 
+	/* MediaInfoFocalLength */
+
     public static function MediaInfoFocalLength($attr)
     {
 	   return mediaInfoTpl::MediaInfoFormat($attr, 'FocalLength');
     }
 
+	/* MediaInfoISOSpeedRatings */
+
     public static function MediaInfoISOSpeedRatings($attr)
     {
  	   return mediaInfoTpl::MediaInfoFormat($attr, 'ISOSpeedRatings');
     }
+
+	/* MediaInfoFormat */
 
 	public static function MediaInfoFormat($attr, $tech)
 	{
@@ -317,7 +346,9 @@ class mediaInfoTpl
 		$f = $GLOBALS['core']->tpl->getFilters($attr);
        return '<?php echo ' . sprintf($f, 'sprintf(\'' . $format . '\',$m[\'' . $tech . '\']) ') . '; ?>';
 	}
-	
+
+	/* MediaInfoSize */
+
     public static function MediaInfoSize($attr)
     {
 		$divisor = "1";
@@ -334,6 +365,8 @@ class mediaInfoTpl
         $f = $GLOBALS['core']->tpl->getFilters($attr);
         return '<?php echo ' . sprintf($f, 'sprintf(\'' . $format . '\',' . $var ) . ' ); ?>';
     }
+
+	/* MediaInfoAllExif */
 
 	public static function MediaInfoAllExif($attr)
 	{
@@ -364,18 +397,24 @@ class mediaInfoTpl
  		$f = $GLOBALS['core']->tpl->getFilters($attr);
         return '<?php echo ' . sprintf($f, 'sprintf(\'' . $format . '\',' . $var ) . ' ) ; ?>';
 	}
-	
+
+	/* MediaInfoMake */
+
     public static function MediaInfoMake($attr)
     {
         $f = $GLOBALS['core']->tpl->getFilters($attr);
         return '<?php echo ' . sprintf($f, '$m[\'Make\']') . '; ?>';
     }
 
+	/* MediaInfoModel */
+
     public static function MediaInfoModel($attr)
     {
         $f = $GLOBALS['core']->tpl->getFilters($attr);
         return '<?php echo ' . sprintf($f, '$m[\'Model\']') . '; ?>';
     }
+
+	/* MediaInfoDateTimeOriginal */
 
     public static function MediaInfoDateTimeOriginal($attr)
     {
@@ -386,6 +425,8 @@ class mediaInfoTpl
 		$f = $GLOBALS['core']->tpl->getFilters($attr);
         return '<?php echo ' . sprintf($f, 'dt::dt2str(\'' . $format . '\', $m[\'DateTimeOriginal\'])' ) . '; ?>';
     }
+
+	/* EntryMediaInfoCount */
 
      public static function EntryMediaInfoCount($attr)
     {
@@ -400,16 +441,5 @@ class mediaInfoTpl
             $attr,
             false
         );
-    }
-}
-
-class mediaInfoBehavior
-{
-    public static function tplIfConditions($tag, $attr, $content, $if)
-    {
-        if ($tag == "EntryIf" && isset($attr['has_mediaInfo'])) {
-            $sign = (boolean) $attr['has_mediaInfo'] ? '' : '!';
-            $if[] = $sign . '$_ctx->posts->countMedia(\'attachment\')';
-        }
     }
 }
