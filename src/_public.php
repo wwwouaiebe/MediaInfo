@@ -88,7 +88,7 @@ class mediaInfoTpl
 			'DateTimeOriginal' => '',
 			'has_exif' => false,
 			'ThumbnailUrl' => '',
-			'Size' => '0 b.',
+			'Size' => '0',
 			'MimeType' => '',
 			'FileName' =>'',
 			'has_thumbnail' =>false,
@@ -122,18 +122,7 @@ class mediaInfoTpl
 				{
 					if (!empty($exif[ 'FILE']['FileSize']))
 					{
-						if ( 1000 > $exif[ 'FILE']['FileSize'] )
-						{
-							$mi['Size'] = sprintf ( '%d o.', $exif[ 'FILE']['FileSize']);
-						}
-						else if ( 1000000 > $exif[ 'FILE']['FileSize'] ) 
-						{
-							$mi['Size'] = sprintf ( '%d Ko.', $exif[ 'FILE']['FileSize']/1000);
-						}
-						else
-						{
-							$mi['Size'] = sprintf ( '%f Mo.', $exif[ 'FILE']['FileSize']/1000000);
-						}
+						$mi['Size'] = $exif[ 'FILE']['FileSize'];
 					}
 					if (!empty($exif[ 'FILE']['MimeType']))
 					{
@@ -275,12 +264,6 @@ class mediaInfoTpl
         return '<?php echo ' . sprintf($f, '$m[\'FileName\']') . '; ?>';
     }
 
-    public static function MediaInfoSize($attr)
-    {
-         $f = $GLOBALS['core']->tpl->getFilters($attr);
-        return '<?php echo ' . sprintf($f, '$m[\'Size\']') . '; ?>';
-    }
-
     public static function MediaInfoThumbnailUrl($attr)
     {
         $f = $GLOBALS['core']->tpl->getFilters($attr);
@@ -335,13 +318,30 @@ class mediaInfoTpl
        return '<?php echo ' . sprintf($f, 'sprintf(\'' . $format . '\',$m[\'' . $tech . '\']) ') . '; ?>';
 	}
 	
+    public static function MediaInfoSize($attr)
+    {
+		$divisor = "1";
+        if (isset($attr['divisor'])) {
+			$divisor = $attr['divisor'];
+		}
+		
+		$format = "%d";
+        if (isset($attr['format'])) {
+			$format = $attr['format'];
+		}
+	
+		$var = '$m[\'Size\']/' . $divisor;
+        $f = $GLOBALS['core']->tpl->getFilters($attr);
+        return '<?php echo ' . sprintf($f, 'sprintf(\'' . $format . '\',' . $var ) . ' ); ?>';
+    }
+
 	public static function MediaInfoAllExif($attr)
 	{
  		$format = '%s %s %s %s %s';
- 		$var = '\',$m[\'Model\'],$m[\'FocalLength\'],$m[\'FNumber\'],$m[\'ExposureTime\'],$m[\'ISOSpeedRatings\'] ) ';
+ 		$var = '$m[\'Model\'],$m[\'FocalLength\'],$m[\'FNumber\'],$m[\'ExposureTime\'],$m[\'ISOSpeedRatings\']';
         if (isset($attr['format'])) {
 			$formatArray = explode ( '%', addslashes($attr['format']) );
-			$var = '\',';
+			$var = '';
 			$format = '';
 			foreach ( $formatArray  as $i => $formatPart ) {
 				switch ( $formatPart ) {
@@ -360,10 +360,9 @@ class mediaInfoTpl
 				}					
 			}
 			$var = substr ($var, 0, -1 );
-			$var .= ' ) ';
 		}
  		$f = $GLOBALS['core']->tpl->getFilters($attr);
-        return '<?php echo ' . sprintf($f, 'sprintf(\'' . $format . $var ) . '; ?>';
+        return '<?php echo ' . sprintf($f, 'sprintf(\'' . $format . '\',' . $var ) . ' ) ; ?>';
 	}
 	
     public static function MediaInfoMake($attr)
