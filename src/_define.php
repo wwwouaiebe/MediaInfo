@@ -27,7 +27,7 @@
 if (!defined('DC_RC_PATH')) {return;}
 
 $this->registerModule(
-    "mediaInfos",             // Name
+    "mediaExifInfos",             // Name
     "Manage post attachments", // Description
     "wwwouaiebe",           // Author
     '1.0.0',                     // Version

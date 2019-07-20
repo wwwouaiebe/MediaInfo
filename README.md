@@ -1,2 +1,2 @@
-# MediaInfo
+# mediaExifInfo
 plugin for Dotclear
