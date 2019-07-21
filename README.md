@@ -17,8 +17,8 @@ Seuls les fichiers avec une extension .jpg, .jpeg, .tif ou .tiff (en minuscules 
 
 Je ne possède pas des centaines d'appareils photo ni de versions de php. Je n'ai pu tester le plugin que sur mon serveur et avec mes propres photos. La norme exif est une brochure de près de 200 pages. Pouvoir tout tester sort du cadre dece plugin.
 
-Peut-être vous demandez-vous quel est l'intérêt de ce plugin qui lit les données exif des photos attachées aux posts. Mon blog me sert à publier des photos. Dans le contenu de chaque post, je ne passes pas mon temps à insérer des éléments
-html <img> pour chaque photo. Toute la mise en page des photos est faite dans les fichiers tpl du thème. Extrait des fichiers tpl:
+Peut-être vous demandez-vous quel est l'intérêt de ce plugin qui lit les données exif des photos attachées aux posts. Mon blog me sert à publier des photos. Dans le contenu de chaque post, je ne passe pas mon temps à insérer des éléments
+html &lt;img&gt; pour chaque photo. Toute la mise en page des photos est faite dans les fichiers tpl du thème. Extrait des fichiers tpl:
 
 ```
 <tpl:Entries>
@@ -32,10 +32,10 @@ html <img> pour chaque photo. Toute la mise en page des photos est faite dans le
 			</p>
 			<tpl:MediaExifInfoIf has_exif="1">
 				<p class="PictureDate">
-					{{tpl:lang cyPostDateText1}}{{tpl:MediaExifInfoDateTimeOriginal format="%A&nbsp;%e&nbsp;%B&nbsp;%Y"}}{{tpl:lang cyPostDateText2}}{{tpl:MediaExifInfoDateTimeOriginal format="%H"}}{{tpl:lang cyPostDateText3}}{{tpl:MediaExifInfoDateTimeOriginal format="%M"}}
+					{{tpl:lang PostDateText}}{{tpl:MediaExifInfoDateTimeOriginal format="%A %e %B %Y"}}
 				</p>
 				<p class="PictureInfo">
-					<span>&#x1f4f7;</span><span>{{tpl:MediaExifInfoAllExif format="%Model%&nbsp;%FocalLength% mm - f&nbsp;%FNumber% %ExposureTime%&nbsp;sec. %ISOSpeedRatings%&nbsp;ISO"}}</span>
+					<span>&#x1f4f7;</span><span>{{tpl:MediaExifInfoAllExif format="%Model% %FocalLength% mm - f %FNumber% %ExposureTime% sec. %ISOSpeedRatings% ISO"}}</span>
 				</p>
 			</tpl:MediaExifInfoIf>
 		</div>
@@ -46,13 +46,13 @@ html <img> pour chaque photo. Toute la mise en page des photos est faite dans le
 
 ## Balises tpl
 
-### <tpl:MediaExifInfos>
+### &lt;tpl:MediaExifInfos&gt;
 
-### <tpl:MediaExifInfosHeader>
+### &lt;tpl:MediaExifInfosHeader&gt;
 
-### <tpl:MediaExifInfosFooter>
+### &lt;tpl:MediaExifInfosFooter&gt;
 
-### <tpl:MediaExifInfoIf>
+### &lt;tpl:MediaExifInfoIf&gt;
 
 #### Attributs
 
@@ -136,7 +136,7 @@ Valeur par défaut: "%s"
 
 ##### format
 
-Valeur par défaut: "%%A %e %B %Y %H:%M:%S"
+Valeur par défaut: "%A %e %B %Y %H:%M:%S"
 
 ### {{tpl:MediaExifInfoAllExif}}
 
