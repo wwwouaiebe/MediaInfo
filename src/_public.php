@@ -62,7 +62,7 @@ class mediaExifInfoTpl
             '<?php foreach ($_ctx->mediaInfos as $attach_i => $attach_f) : ' .
             '$GLOBALS[\'attach_i\'] = $attach_i; $GLOBALS[\'attach_f\'] = $attach_f;' .
             '$_ctx->file_url = $attach_f->file_url;' .
- 			'$m = fileExifInfo::SearchExifData($attach_f->relname);' .
+ 			'$m = fileExifInfo::SearchExifData(\'public/\' . $attach_f->relname);' .
 			' ?>' .
             $content .
             '<?php endforeach; $_ctx->mediaInfos = null; unset($attach_i,$attach_f,$_ctx->file_url); ?>' .
@@ -70,137 +70,6 @@ class mediaExifInfoTpl
             "<?php } ?>\n";
 
         return $res;
-    }
-
-	/* MediaExifInfoSearch */
-	
-    public static function MediaExifInfoSearch($fi)
-    {
-		$mi = array(
-			'RelUrl' => 'public/' . $fi,
-			'Class' => 'Landscape',
-			'ExposureTime' => '',
-			'FNumber' => '',
-			'FocalLength' => '',
-			'ISOSpeedRatings' => '',
-			'Make' => '',
-			'Model' => '',
-			'DateTimeOriginal' => '',
-			'has_exif' => false,
-			'ThumbnailUrl' => '',
-			'Size' => '0',
-			'MimeType' => '',
-			'FileName' =>'',
-			'has_thumbnail' =>false,
-			'is_jpg' => false,
-			'is_tiff' => false
-		);
-		if ( file_exists($mi['RelUrl']) )
-		{
-			$path_parts = pathinfo($mi['RelUrl']);
-			$ThumbnailUrl = $path_parts['dirname'] . '/' . $path_parts['filename'] . '_s.' . $path_parts['extension'];
-			$ext = strtoupper ( $path_parts['extension'] );
-			if ( 'JPG' != $ext && 'JPEG' != $ext && 'TIF' != $ext && 'TIFF' != $ext ) {
-				return;
-			}
-			if ( 'JPG' == $ext || 'JPEG' == $ext ) {
-				$mi['is_jpg'] = true;
-			}
-			else {
-				$mi['is_tiff'] = true;
-			}
-			if ( file_exists($ThumbnailUrl) )
-			{
-				$mi['ThumbnailUrl'] = $ThumbnailUrl;
-				$mi['has_thumbnail'] = true;
-			}
-
-			$exif = exif_read_data($mi['RelUrl'], 'ANY_TAG', true );
-			if ( $exif )
-			{
-				if ( $exif[ 'FILE'] )
-				{
-					if (!empty($exif[ 'FILE']['FileSize']))
-					{
-						$mi['Size'] = $exif[ 'FILE']['FileSize'];
-					}
-					if (!empty($exif[ 'FILE']['MimeType']))
-					{
-						$mi['MimeType'] = $exif[ 'FILE']['MimeType'];
-					}
-					if (!empty($exif[ 'FILE']['FileName']))
-					{
-						$mi['FileName'] = $exif[ 'FILE']['FileName'];
-					}
-				}
-				if ( $exif[ 'COMPUTED'] && $exif[ 'COMPUTED']['Height'] && $exif[ 'COMPUTED']['Width'] )
-				{
-					$mi['Class'] = $exif[ 'COMPUTED']['Height'] > $exif[ 'COMPUTED']['Width'] ? "Portrait" : "Landscape";
-				}
-				if ( $exif[ 'IFD0'] )
-				{
-					if (!empty($exif[ 'IFD0']['Make']))
-					{
-						$mi['Make'] = $exif[ 'IFD0']['Make'];
-					}
-					if (!empty($exif[ 'IFD0']['Model']))
-					{
-						$mi['Model'] = $exif[ 'IFD0']['Model'];
-					}
-				}
-				if ( $exif[ 'EXIF'] )
-				{
-					if (!empty($exif[ 'EXIF']['FNumber']))
-					{
-						$fl = sscanf($exif[ 'EXIF']['FNumber'],'%d/%d');
-						$mi['FNumber'] = $fl && $fl[0] && $fl[1] ? $fl[0]/$fl[1].'' : $exif[ 'EXIF']['FNumber'];
-					}
-					if (!empty($exif[ 'EXIF']['ExposureTime']))
-					{
-						$fl = sscanf($exif[ 'EXIF']['ExposureTime'],'%d/%d');
-						if ( $fl && $fl[0] && $fl[1] )
-						{
-							if ( $fl[0] == $fl[1] )
-							{
-								$mi['ExposureTime'] = '1';
-							}
-							else if ( $fl[0] > $fl[1] )
-							{
-								$mi['ExposureTime'] = sprintf ( '%d',  $fl[0]/ $fl[1] );
-							}
-							else
-							{
-								$mi['ExposureTime'] = $exif[ 'EXIF']['ExposureTime'];
-							}
-						}
-						else
-						{
-							$mi['ExposureTime'] = $exif[ 'EXIF']['ExposureTime'];
-						}
-					}
-					if (!empty($exif[ 'EXIF']['ISOSpeedRatings']))
-					{
-						$mi['ISOSpeedRatings'] = $exif[ 'EXIF']['ISOSpeedRatings'];
-					}
-					if (!empty($exif[ 'EXIF']['FocalLength']))
-					{
-						$fl = sscanf($exif[ 'EXIF']['FocalLength'],'%d/%d');
-						$mi['FocalLength'] = $fl && $fl[0] && $fl[1] ? sprintf ( '%d',  $fl[0]/ $fl[1] ) : $im['FocalLength'];
-					}
-					if (!empty($exif[ 'EXIF']['DateTimeOriginal']))
-					{
-						$mi['DateTimeOriginal'] = $exif[ 'EXIF']['DateTimeOriginal'];
-					}
-				}
-			}
-			
-			if ( !empty($mi['ISOSpeedRatings']) && !empty($mi['FocalLength']) && !empty($mi['FNumber']) && !empty($mi['ExposureTime']) )
-			{
-				$mi['has_exif'] = true;
-			}			
-		} 
-		
-		return $mi;
     }
 
 	/* MediaExifInfosHeader */
@@ -428,10 +297,12 @@ class mediaExifInfoTpl
 if ( ! class_exists('fileExifInfo') ) {
 	class fileExifInfo 
 	{
+		/* SearchExifData */
+
 		public static function SearchExifData( $fi )
 		{
 			$mi = array(
-				'RelUrl' => 'public/' . $fi,
+				'RelUrl' => $fi,
 				'Class' => 'Landscape',
 				'ExposureTime' => '',
 				'FNumber' => '',
@@ -441,7 +312,7 @@ if ( ! class_exists('fileExifInfo') ) {
 				'Model' => '',
 				'DateTimeOriginal' => '',
 				'has_exif' => false,
-				'ThumbnailUrl' => '',
+				'ThumbnailUrl' => 'a',
 				'Size' => '0',
 				'MimeType' => '',
 				'FileName' =>'',
