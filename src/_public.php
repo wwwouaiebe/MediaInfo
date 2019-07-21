@@ -238,8 +238,8 @@ class mediaExifInfoTpl
 
 	public static function MediaExifInfoAll($attr)
 	{
- 		$format = '%s %s %s %s %s';
- 		$var = '$m[\'Model\'],$m[\'FocalLength\'],$m[\'FNumber\'],$m[\'ExposureTime\'],$m[\'ISOSpeedRatings\']';
+ 		$format = '%s %s %s %s %s %s';
+ 		$var = '$m[\'Make\'],$m[\'Model\'],$m[\'FocalLength\'],$m[\'FNumber\'],$m[\'ExposureTime\'],$m[\'ISOSpeedRatings\']';
         if (isset($attr['format'])) {
 			$formatArray = explode ( '%', addslashes($attr['format']) );
 			$var = '';
