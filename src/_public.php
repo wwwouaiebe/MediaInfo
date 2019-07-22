@@ -31,7 +31,6 @@ $core->tpl->addBlock('MediaExifInfosHeader', array('mediaExifInfoTpl', 'MediaExi
 $core->tpl->addBlock('MediaExifInfosFooter', array('mediaExifInfoTpl', 'MediaExifInfosFooter'));
 $core->tpl->addBlock('MediaExifInfoIf', array('mediaExifInfoTpl', 'MediaExifInfoIf'));
 
-$core->tpl->addValue('MediaExifInfoUrl', array('mediaExifInfoTpl', 'MediaExifInfoUrl'));
 $core->tpl->addValue('MediaExifInfoFileName', array('mediaExifInfoTpl', 'MediaExifInfoFileName'));
 $core->tpl->addValue('MediaExifInfoMimeType', array('mediaExifInfoTpl', 'MediaExifInfoMimeType'));
 $core->tpl->addValue('MediaExifInfoSize', array('mediaExifInfoTpl', 'MediaExifInfoSize'));
@@ -149,14 +148,6 @@ class mediaExifInfoTpl
     {
         $f = $GLOBALS['core']->tpl->getFilters($attr);
         return '<?php echo ' . sprintf($f, '$m[\'ThumbnailUrl\']') . '; ?>';
-    }
-
-	/* MediaExifInfoUrl */
-
-    public static function MediaExifInfoUrl($attr)
-    {
-        $f = $GLOBALS['core']->tpl->getFilters($attr);
-        return '<?php echo ' . sprintf($f, '$attach_f->file_url') . '; ?>';
     }
 
 	/* MediaExifInfoRelUrl */
@@ -303,7 +294,7 @@ if ( ! class_exists('fileExifInfo') ) {
 		{
 			$mi = array(
 				'RelUrl' => $fi,
-				'Class' => 'Landscape',
+				'Class' => '',
 				'ExposureTime' => '',
 				'FNumber' => '',
 				'FocalLength' => '',
