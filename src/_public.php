@@ -34,7 +34,7 @@ $core->tpl->addBlock('MediaExifInfoIf', array('mediaExifInfoTpl', 'MediaExifInfo
 $core->tpl->addValue('MediaExifInfoFileName', array('mediaExifInfoTpl', 'MediaExifInfoFileName'));
 $core->tpl->addValue('MediaExifInfoMimeType', array('mediaExifInfoTpl', 'MediaExifInfoMimeType'));
 $core->tpl->addValue('MediaExifInfoSize', array('mediaExifInfoTpl', 'MediaExifInfoSize'));
-$core->tpl->addValue('MediaExifInfoThumbnailUrl', array('mediaExifInfoTpl', 'MediaExifInfoThumbnailUrl'));
+$core->tpl->addValue('MediaExifInfoThumbnailRelUrl', array('mediaExifInfoTpl', 'MediaExifInfoThumbnailRelUrl'));
 $core->tpl->addValue('MediaExifInfoRelUrl', array('mediaExifInfoTpl', 'MediaExifInfoRelUrl'));
 $core->tpl->addValue('MediaExifInfoClass', array('mediaExifInfoTpl', 'MediaExifInfoClass'));
 $core->tpl->addValue('MediaExifInfoExposureTime', array('mediaExifInfoTpl', 'MediaExifInfoExposureTime'));
@@ -142,12 +142,12 @@ class mediaExifInfoTpl
         return '<?php echo ' . sprintf($f, '$m[\'FileName\']') . '; ?>';
     }
 
-	/* MediaExifInfoThumbnailUrl */
+	/* MediaExifInfoThumbnailRelUrl */
 
-    public static function MediaExifInfoThumbnailUrl($attr)
+    public static function MediaExifInfoThumbnailRelUrl($attr)
     {
         $f = $GLOBALS['core']->tpl->getFilters($attr);
-        return '<?php echo ' . sprintf($f, '$m[\'ThumbnailUrl\']') . '; ?>';
+        return '<?php echo ' . sprintf($f, '$m[\'ThumbnailRelUrl\']') . '; ?>';
     }
 
 	/* MediaExifInfoRelUrl */
@@ -303,7 +303,7 @@ if ( ! class_exists('fileExifInfo') ) {
 				'Model' => '',
 				'DateTimeOriginal' => '',
 				'has_exif' => false,
-				'ThumbnailUrl' => 'a',
+				'ThumbnailRelUrl' => '',
 				'Size' => '0',
 				'MimeType' => '',
 				'FileName' =>'',
@@ -314,7 +314,7 @@ if ( ! class_exists('fileExifInfo') ) {
 			if ( file_exists($mi['RelUrl']) )
 			{
 				$path_parts = pathinfo($mi['RelUrl']);
-				$ThumbnailUrl = $path_parts['dirname'] . '/' . $path_parts['filename'] . '_s.' . $path_parts['extension'];
+				$ThumbnailRelUrl = $path_parts['dirname'] . '/' . $path_parts['filename'] . '_s.' . $path_parts['extension'];
 				$ext = strtoupper ( $path_parts['extension'] );
 				if ( 'JPG' != $ext && 'JPEG' != $ext && 'TIF' != $ext && 'TIFF' != $ext ) {
 					return $mi;
@@ -325,9 +325,9 @@ if ( ! class_exists('fileExifInfo') ) {
 				else {
 					$mi['is_tiff'] = true;
 				}
-				if ( file_exists($ThumbnailUrl) )
+				if ( file_exists($ThumbnailRelUrl) )
 				{
-					$mi['ThumbnailUrl'] = $ThumbnailUrl;
+					$mi['ThumbnailRelUrl'] = $ThumbnailRelUrl;
 					$mi['has_thumbnail'] = true;
 				}
 

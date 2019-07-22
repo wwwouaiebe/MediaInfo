@@ -105,6 +105,8 @@ Cette balise retourne une information, même si aucune donnée exif n'est prése
 
 Cette balise retourne la taille du fichier jpg ou tiff.
 
+Cette balise retourne une information, même si aucune donnée exif n'est présente dans la photo.
+
 #### Attributs
 
 ##### divisor
@@ -119,7 +121,7 @@ Une chaine de caractères servant à formater la valeur retournée et suivant le
 
 Valeur par défaut: "%d"
 
-### {{tpl:MediaExifInfoThumbnailUrl}}
+### {{tpl:MediaExifInfoThumbnailRelUrl}}
 
 Cette balise retourne l'url (relative au répertoire racine du blog) de la miniature. Si la miniature n'existe pas, une chaine vide est retournée.
 
