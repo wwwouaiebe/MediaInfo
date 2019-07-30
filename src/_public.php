@@ -34,6 +34,7 @@ $core->tpl->addBlock('MediaExifInfoIf', array('mediaExifInfoTpl', 'MediaExifInfo
 $core->tpl->addValue('MediaExifInfoFileName', array('mediaExifInfoTpl', 'MediaExifInfoFileName'));
 $core->tpl->addValue('MediaExifInfoMimeType', array('mediaExifInfoTpl', 'MediaExifInfoMimeType'));
 $core->tpl->addValue('MediaExifInfoSize', array('mediaExifInfoTpl', 'MediaExifInfoSize'));
+$core->tpl->addValue('MediaExifInfoHtml', array('mediaExifInfoTpl', 'MediaExifInfoHtml'));
 $core->tpl->addValue('MediaExifInfoThumbnailRelUrl', array('mediaExifInfoTpl', 'MediaExifInfoThumbnailRelUrl'));
 $core->tpl->addValue('MediaExifInfoRelUrl', array('mediaExifInfoTpl', 'MediaExifInfoRelUrl'));
 $core->tpl->addValue('MediaExifInfoClass', array('mediaExifInfoTpl', 'MediaExifInfoClass'));
@@ -140,6 +141,14 @@ class mediaExifInfoTpl
     {
         $f = $GLOBALS['core']->tpl->getFilters($attr);
         return '<?php echo ' . sprintf($f, '$m[\'FileName\']') . '; ?>';
+    }
+
+	/* MediaExifInfoHtml */
+
+    public static function MediaExifInfoHtml($attr)
+    {
+        $f = $GLOBALS['core']->tpl->getFilters($attr);
+        return '<?php echo ' . sprintf($f, '$m[\'Html\']') . '; ?>';
     }
 
 	/* MediaExifInfoThumbnailRelUrl */
@@ -305,6 +314,7 @@ if ( ! class_exists('fileExifInfo') ) {
 				'has_exif' => false,
 				'ThumbnailRelUrl' => '',
 				'Size' => '0',
+				'Html' => '',
 				'MimeType' => '',
 				'FileName' =>'',
 				'has_thumbnail' =>false,
@@ -349,9 +359,14 @@ if ( ! class_exists('fileExifInfo') ) {
 							$mi['FileName'] = $exif[ 'FILE']['FileName'];
 						}
 					}
-					if ( $exif[ 'COMPUTED'] && $exif[ 'COMPUTED']['Height'] && $exif[ 'COMPUTED']['Width'] )
-					{
-						$mi['Class'] = $exif[ 'COMPUTED']['Height'] > $exif[ 'COMPUTED']['Width'] ? "Portrait" : "Landscape";
+					if ( $exif[ 'COMPUTED'] ) {
+						if ( $exif[ 'COMPUTED']['Height'] && $exif[ 'COMPUTED']['Width'] )
+						{
+							$mi['Class'] =  $exif[ 'COMPUTED']['Height'] == $exif[ 'COMPUTED']['Width'] ? 'Square' : ( $exif[ 'COMPUTED']['Height'] > $exif[ 'COMPUTED']['Width'] ? "Portrait" : "Landscape" );
+						}
+						if ( $exif[ 'COMPUTED']['html'] ) {
+							$mi['Html'] = $exif[ 'COMPUTED']['html'];
+						}
 					}
 					if ( $exif[ 'IFD0'] )
 					{
