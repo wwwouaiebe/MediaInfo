@@ -135,7 +135,14 @@ Cette balise retourne le nom du fichier.
 
 ### {{tpl:MediaExifInfoClass}}
 
-Cette balise retourne "Landscape" ou "Portrait", selon l'orientation de la photo.
+Cette balise retourne "Landscape", "Square" ou "Portrait", selon l'orientation de la photo.
+
+### {{tpl:MediaExifInfoHtml}}
+
+Cette balise retourne le texte 'width="xxx" height="yyy"' où xxx est la largeur de la photo en pixel et yyy la hauteur. Ce texte peut être utilisé
+comme attributs dans une balise html &lt;img&gt; pour indiquer la largeur et la hauteur de l'image.
+
+MediaExifInfoHtml
 
 ### {{tpl:MediaExifInfoExposureTime}}
 
