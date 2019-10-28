@@ -142,8 +142,6 @@ Cette balise retourne "Landscape", "Square" ou "Portrait", selon l'orientation d
 Cette balise retourne le texte 'width="xxx" height="yyy"' où xxx est la largeur de la photo en pixel et yyy la hauteur. Ce texte peut être utilisé
 comme attributs dans une balise html &lt;img&gt; pour indiquer la largeur et la hauteur de l'image.
 
-MediaExifInfoHtml
-
 ### {{tpl:MediaExifInfoExposureTime}}
 
 Cette balise retourne le temps d'exposition de la photo, en secondes. les temps d'exposition inférieurs à la seconde sont retournés sous forme de fraction, comme il est usuel en photographie. 

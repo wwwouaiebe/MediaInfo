@@ -212,7 +212,7 @@ class mediaExifInfoTpl
 			$format = addslashes($attr['format']);
 		}
 		$f = $GLOBALS['core']->tpl->getFilters($attr);
-       return '<?php echo ' . sprintf($f, 'sprintf(\'' . $format . '\',$m[\'' . $tech . '\']) ') . '; ?>';
+        return '<?php echo ' . sprintf($f, 'sprintf(\'' . $format . '\',$m[\'' . $tech . '\']) ') . '; ?>';
 	}
 
 	/* MediaExifInfoSize */
@@ -231,7 +231,7 @@ class mediaExifInfoTpl
 	
 		$var = '$m[\'Size\']/' . $divisor;
         $f = $GLOBALS['core']->tpl->getFilters($attr);
-        return '<?php echo ' . sprintf($f, 'sprintf(\'' . $format . '\',' . $var ) . ' ); ?>';
+       return '<?php echo ' . sprintf($f, 'sprintf(\'' . $format . '\',' . $var .')' ) . ' ; ?>';
     }
 
 	/* MediaExifInfoAll */
@@ -263,7 +263,7 @@ class mediaExifInfoTpl
 			$var = substr ($var, 0, -1 );
 		}
  		$f = $GLOBALS['core']->tpl->getFilters($attr);
-        return '<?php echo ' . sprintf($f, 'sprintf(\'' . $format . '\',' . $var ) . ' ) ; ?>';
+        return '<?php echo ' . sprintf($f, 'sprintf(\'' . $format . '\',' . $var . ')' ) . '; ?>';
 	}
 
 	/* MediaExifInfoMake */
