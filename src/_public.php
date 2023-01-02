@@ -26,26 +26,26 @@
 
 if (!defined('DC_RC_PATH')) {return;}
 
-$core->tpl->addBlock('MediaExifInfos', array('mediaExifInfoTpl', 'MediaExifInfos'));
-$core->tpl->addBlock('MediaExifInfosHeader', array('mediaExifInfoTpl', 'MediaExifInfosHeader'));
-$core->tpl->addBlock('MediaExifInfosFooter', array('mediaExifInfoTpl', 'MediaExifInfosFooter'));
-$core->tpl->addBlock('MediaExifInfoIf', array('mediaExifInfoTpl', 'MediaExifInfoIf'));
+dcCore::app()->tpl->addBlock('MediaExifInfos', array('mediaExifInfoTpl', 'MediaExifInfos'));
+dcCore::app()->tpl->addBlock('MediaExifInfosHeader', array('mediaExifInfoTpl', 'MediaExifInfosHeader'));
+dcCore::app()->tpl->addBlock('MediaExifInfosFooter', array('mediaExifInfoTpl', 'MediaExifInfosFooter'));
+dcCore::app()->tpl->addBlock('MediaExifInfoIf', array('mediaExifInfoTpl', 'MediaExifInfoIf'));
 
-$core->tpl->addValue('MediaExifInfoFileName', array('mediaExifInfoTpl', 'MediaExifInfoFileName'));
-$core->tpl->addValue('MediaExifInfoMimeType', array('mediaExifInfoTpl', 'MediaExifInfoMimeType'));
-$core->tpl->addValue('MediaExifInfoSize', array('mediaExifInfoTpl', 'MediaExifInfoSize'));
-$core->tpl->addValue('MediaExifInfoHtml', array('mediaExifInfoTpl', 'MediaExifInfoHtml'));
-$core->tpl->addValue('MediaExifInfoThumbnailRelUrl', array('mediaExifInfoTpl', 'MediaExifInfoThumbnailRelUrl'));
-$core->tpl->addValue('MediaExifInfoRelUrl', array('mediaExifInfoTpl', 'MediaExifInfoRelUrl'));
-$core->tpl->addValue('MediaExifInfoClass', array('mediaExifInfoTpl', 'MediaExifInfoClass'));
-$core->tpl->addValue('MediaExifInfoExposureTime', array('mediaExifInfoTpl', 'MediaExifInfoExposureTime'));
-$core->tpl->addValue('MediaExifInfoFNumber', array('mediaExifInfoTpl', 'MediaExifInfoFNumber'));
-$core->tpl->addValue('MediaExifInfoFocalLength', array('mediaExifInfoTpl', 'MediaExifInfoFocalLength'));
-$core->tpl->addValue('MediaExifInfoISOSpeedRatings', array('mediaExifInfoTpl', 'MediaExifInfoISOSpeedRatings'));
-$core->tpl->addValue('MediaExifInfoMake', array('mediaExifInfoTpl', 'MediaExifInfoMake'));
-$core->tpl->addValue('MediaExifInfoModel', array('mediaExifInfoTpl', 'MediaExifInfoModel'));
-$core->tpl->addValue('MediaExifInfoDateTimeOriginal', array('mediaExifInfoTpl', 'MediaExifInfoDateTimeOriginal'));
-$core->tpl->addValue('MediaExifInfoAllExif', array('mediaExifInfoTpl', 'MediaExifInfoAll'));
+dcCore::app()->tpl->addValue('MediaExifInfoFileName', array('mediaExifInfoTpl', 'MediaExifInfoFileName'));
+dcCore::app()->tpl->addValue('MediaExifInfoMimeType', array('mediaExifInfoTpl', 'MediaExifInfoMimeType'));
+dcCore::app()->tpl->addValue('MediaExifInfoSize', array('mediaExifInfoTpl', 'MediaExifInfoSize'));
+dcCore::app()->tpl->addValue('MediaExifInfoHtml', array('mediaExifInfoTpl', 'MediaExifInfoHtml'));
+dcCore::app()->tpl->addValue('MediaExifInfoThumbnailRelUrl', array('mediaExifInfoTpl', 'MediaExifInfoThumbnailRelUrl'));
+dcCore::app()->tpl->addValue('MediaExifInfoRelUrl', array('mediaExifInfoTpl', 'MediaExifInfoRelUrl'));
+dcCore::app()->tpl->addValue('MediaExifInfoClass', array('mediaExifInfoTpl', 'MediaExifInfoClass'));
+dcCore::app()->tpl->addValue('MediaExifInfoExposureTime', array('mediaExifInfoTpl', 'MediaExifInfoExposureTime'));
+dcCore::app()->tpl->addValue('MediaExifInfoFNumber', array('mediaExifInfoTpl', 'MediaExifInfoFNumber'));
+dcCore::app()->tpl->addValue('MediaExifInfoFocalLength', array('mediaExifInfoTpl', 'MediaExifInfoFocalLength'));
+dcCore::app()->tpl->addValue('MediaExifInfoISOSpeedRatings', array('mediaExifInfoTpl', 'MediaExifInfoISOSpeedRatings'));
+dcCore::app()->tpl->addValue('MediaExifInfoMake', array('mediaExifInfoTpl', 'MediaExifInfoMake'));
+dcCore::app()->tpl->addValue('MediaExifInfoModel', array('mediaExifInfoTpl', 'MediaExifInfoModel'));
+dcCore::app()->tpl->addValue('MediaExifInfoDateTimeOriginal', array('mediaExifInfoTpl', 'MediaExifInfoDateTimeOriginal'));
+dcCore::app()->tpl->addValue('MediaExifInfoAllExif', array('mediaExifInfoTpl', 'MediaExifInfoAll'));
 
 class mediaExifInfoTpl
 {
@@ -56,16 +56,16 @@ class mediaExifInfoTpl
     {
        $res =
             "<?php\n" .
-            'if ($_ctx->posts !== null && $core->media) {' . "\n" .
-            '$_ctx->mediaInfos = new ArrayObject($core->media->getPostMedia($_ctx->posts->post_id,null,"attachment"));' . "\n" .
+            'if (dcCore::app()->ctx->posts !== null && dcCore::app()->media) {' . "\n" .
+            'dcCore::app()->ctx->mediaInfos = new ArrayObject(dcCore::app()->media->getPostMedia(dcCore::app()->ctx->posts->post_id,null,"attachment"));' . "\n" .
             "?>\n" .
-            '<?php foreach ($_ctx->mediaInfos as $attach_i => $attach_f) : ' .
+            '<?php foreach (dcCore::app()->ctx->mediaInfos as $attach_i => $attach_f) : ' .
             '$GLOBALS[\'attach_i\'] = $attach_i; $GLOBALS[\'attach_f\'] = $attach_f;' .
-            '$_ctx->file_url = $attach_f->file_url;' .
+            'dcCore::app()->ctx->file_url = $attach_f->file_url;' .
  			'$m = fileExifInfo::SearchExifData(\'public/\' . $attach_f->relname);' .
 			' ?>' .
             $content .
-            '<?php endforeach; $_ctx->mediaInfos = null; unset($attach_i,$attach_f,$_ctx->file_url); ?>' .
+            '<?php endforeach; dcCore::app()->ctx->mediaInfos = null; unset($attach_i,$attach_f,dcCore::app()->ctx->file_url); ?>' .
 
             "<?php } ?>\n";
 
@@ -87,7 +87,7 @@ class mediaExifInfoTpl
     public static function MediaExifInfosFooter($attr, $content)
     {
         return
-            "<?php if (\$attach_i+1 == count(\$_ctx->mediaInfos)) : ?>" .
+            "<?php if (\$attach_i+1 == count(\dcCore::app()->ctx->mediaInfos)) : ?>" .
             $content .
             "<?php endif; ?>";
     }
@@ -131,7 +131,7 @@ class mediaExifInfoTpl
 
     public static function MediaExifInfoMimeType($attr)
     {
-        $f = $GLOBALS['core']->tpl->getFilters($attr);
+        $f = dcCore::app()->tpl->getFilters($attr);
        return '<?php echo ' . sprintf($f, '$m[\'MimeType\']') . '; ?>';
     }
 
@@ -139,7 +139,7 @@ class mediaExifInfoTpl
 
     public static function MediaExifInfoFileName($attr)
     {
-        $f = $GLOBALS['core']->tpl->getFilters($attr);
+        $f = dcCore::app()->tpl->getFilters($attr);
         return '<?php echo ' . sprintf($f, '$m[\'FileName\']') . '; ?>';
     }
 
@@ -147,7 +147,7 @@ class mediaExifInfoTpl
 
     public static function MediaExifInfoHtml($attr)
     {
-        $f = $GLOBALS['core']->tpl->getFilters($attr);
+        $f = dcCore::app()->tpl->getFilters($attr);
         return '<?php echo ' . sprintf($f, '$m[\'Html\']') . '; ?>';
     }
 
@@ -155,7 +155,7 @@ class mediaExifInfoTpl
 
     public static function MediaExifInfoThumbnailRelUrl($attr)
     {
-        $f = $GLOBALS['core']->tpl->getFilters($attr);
+        $f = dcCore::app()->tpl->getFilters($attr);
         return '<?php echo ' . sprintf($f, '$m[\'ThumbnailRelUrl\']') . '; ?>';
     }
 
@@ -163,7 +163,7 @@ class mediaExifInfoTpl
 
     public static function MediaExifInfoRelUrl($attr)
     {
-        $f = $GLOBALS['core']->tpl->getFilters($attr);
+        $f = dcCore::app()->tpl->getFilters($attr);
         return '<?php echo ' . sprintf($f, '$m[\'RelUrl\']') . '; ?>';
     }
 
@@ -171,7 +171,7 @@ class mediaExifInfoTpl
 
     public static function MediaExifInfoClass($attr)
     {
-        $f = $GLOBALS['core']->tpl->getFilters($attr);
+        $f = dcCore::app()->tpl->getFilters($attr);
         return '<?php echo ' . sprintf($f, '$m[\'Class\']') . '; ?>';
     }
 
@@ -211,7 +211,7 @@ class mediaExifInfoTpl
         if (isset($attr['format'])) {
 			$format = addslashes($attr['format']);
 		}
-		$f = $GLOBALS['core']->tpl->getFilters($attr);
+		$f = dcCore::app()->tpl->getFilters($attr);
         return '<?php echo ' . sprintf($f, 'sprintf(\'' . $format . '\',$m[\'' . $tech . '\']) ') . '; ?>';
 	}
 
@@ -230,7 +230,7 @@ class mediaExifInfoTpl
 		}
 	
 		$var = '$m[\'Size\']/' . $divisor;
-        $f = $GLOBALS['core']->tpl->getFilters($attr);
+        $f = dcCore::app()->tpl->getFilters($attr);
        return '<?php echo ' . sprintf($f, 'sprintf(\'' . $format . '\',' . $var .')' ) . ' ; ?>';
     }
 
@@ -262,7 +262,7 @@ class mediaExifInfoTpl
 			}
 			$var = substr ($var, 0, -1 );
 		}
- 		$f = $GLOBALS['core']->tpl->getFilters($attr);
+ 		$f = dcCore::app()->tpl->getFilters($attr);
         return '<?php echo ' . sprintf($f, 'sprintf(\'' . $format . '\',' . $var . ')' ) . '; ?>';
 	}
 
@@ -270,7 +270,7 @@ class mediaExifInfoTpl
 
     public static function MediaExifInfoMake($attr)
     {
-        $f = $GLOBALS['core']->tpl->getFilters($attr);
+        $f = dcCore::app()->tpl->getFilters($attr);
         return '<?php echo ' . sprintf($f, '$m[\'Make\']') . '; ?>';
     }
 
@@ -278,7 +278,7 @@ class mediaExifInfoTpl
 
     public static function MediaExifInfoModel($attr)
     {
-        $f = $GLOBALS['core']->tpl->getFilters($attr);
+        $f = dcCore::app()->tpl->getFilters($attr);
         return '<?php echo ' . sprintf($f, '$m[\'Model\']') . '; ?>';
     }
 
@@ -290,7 +290,7 @@ class mediaExifInfoTpl
         if (isset($attr['format'])) {
 			$format = addslashes($attr['format']);
 		}
-		$f = $GLOBALS['core']->tpl->getFilters($attr);
+		$f = dcCore::app()->tpl->getFilters($attr);
         return '<?php echo ' . sprintf($f, 'dt::dt2str(\'' . $format . '\', $m[\'DateTimeOriginal\'])' ) . '; ?>';
     }
 }
